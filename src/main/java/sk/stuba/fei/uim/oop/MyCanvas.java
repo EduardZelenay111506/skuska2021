@@ -1,47 +1,52 @@
 package sk.stuba.fei.uim.oop;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import java.util.HashSet;
 
-public class MyCanvas extends Canvas implements MouseListener {
-    public RectangleButton gombik;
-    public HashSet<Rectangle> nasestvorce = new HashSet<Rectangle>();
+public class MyCanvas extends Canvas implements MouseListener, MouseMotionListener {
+    public ArrayList<Stvorec> nasestvorce = new ArrayList<Stvorec>();
 
+    Stvorec aktualnyStvorec;
 
+    int xpos,ypos;
 
-    public MyCanvas(RectangleButton gombik) {
+    public MyCanvas() {
         super();
+        this.xpos=0;
+        this.ypos=0;
         addMouseListener(this);
-        this.gombik=gombik;
+        addMouseMotionListener(this);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        int x=e.getX();
-        int y=e.getY();
-        if(gombik.chcemStvorec){
-            nasestvorce.add(new Rectangle(x,y,20,20));
-            repaint();
-            gombik.chcemStvorec=false;
-        }
+
     }
 
     public void paint(Graphics g){
-        for (Rectangle aktualny : nasestvorce){
-            g.drawRect(aktualny.x,aktualny.y, aktualny.width,aktualny.height);
+        for (Stvorec aktualny : nasestvorce){
+            aktualny.kresli(g);
+        }
+        if (aktualnyStvorec!=null){
+            aktualnyStvorec.kresli(g);
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        xpos=e.getX();
+        ypos=e.getY();
+        aktualnyStvorec=new Stvorec(xpos,ypos,1,1,Color.blue);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        nasestvorce.add(aktualnyStvorec);
+        repaint();
+        aktualnyStvorec = null;
     }
 
     @Override
@@ -51,6 +56,40 @@ public class MyCanvas extends Canvas implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        int dx = e.getX();
+        int dy = e.getY();
+        if (aktualnyStvorec!=null){
+            if(dx > xpos && dy > ypos) {
+                aktualnyStvorec.width = dx - xpos;
+                aktualnyStvorec.height = dy - ypos;
+            }
+            if(dx < xpos && dy > ypos) {
+                aktualnyStvorec.x=dx;
+                aktualnyStvorec.width = xpos - dx;
+                aktualnyStvorec.height = dy - ypos;
+            }
+            if(dx > xpos && dy < ypos) {
+                aktualnyStvorec.y=dy;
+                aktualnyStvorec.width = dx - xpos;
+                aktualnyStvorec.height = ypos - dy;
+            }
+            if(dx < xpos && dy < ypos) {
+                aktualnyStvorec.x=dx;
+                aktualnyStvorec.y=dy;
+                aktualnyStvorec.width = xpos - dx;
+                aktualnyStvorec.height = ypos - dy;
+            }
+            repaint();
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
 
     }
 }
